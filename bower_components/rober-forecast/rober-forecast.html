@@ -1,0 +1,144 @@
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+
+<dom-module id="rober-forecast">
+    <style>
+      :host {
+          margin:0 auto;
+          margin-top: 25 px;
+          width: 90%;
+          height: 90%;
+          display: block; 
+          overflow-y: scroll;
+          overflow-x:hidden;
+          background: rgba(0, 0, 0, 0.5)  ;
+          border:solid 1px black;
+          box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.5); 
+          position: absolute;
+            }
+        .day{
+            width: 100%;
+            color: white;
+            font-size: 1em;
+            padding: 10px;
+            @apply(--layout-horizontal);
+            @apply(--layout-center);
+        }
+        .temp_max, .temp_min{
+            width: 20%;
+            font-size: 22px;
+            display: inline-block;
+        }
+        .temp_max::before{
+            content: "🡅";
+            color:white;
+           
+            
+
+        }
+        .temp_min::before{
+            content: "🡇";
+            color:white;
+            
+           
+
+        }
+
+        .date{
+            width: 20%;
+            font-size: 22px;
+            display: inline-block;
+            
+
+        }
+        .arrow{
+            width: 15px;
+        }
+        .desc{
+            width: 20%;
+            font-size: 22px;
+            display: inline-block; 
+        }
+        .city{
+            display: block;
+            width: 100%;
+            font-size: 2em;
+            color:white;
+            text-align: center;
+            padding: 10px;
+        }
+        .humidity{
+            text-align: center;
+            font-size: 22px;
+        }
+
+        @media (max-width: 600px){
+            .desc{
+                display:block;
+                width:70%;
+                text-align: center;
+                margin-left:20%;
+                margin-top:-40px;
+                margin-bottom:10px;
+                font-size: 25px;
+            }
+            .date{
+                width: 40%;
+                display: inline-block;
+            }
+        }
+        p{
+            margin:0;
+        }
+     
+     
+    
+    </style>
+    <template>
+            <span class="city">{{city}}</span>
+            <div class="day">
+                <p class="icon" src={{item.icon}}></p>
+                <p class="desc">Descripcion</p>
+                <p class="date">Fecha</p>
+                <!-- <img src="../../Img/minima.png" class="arrow">  -->
+                <p class="temp_min">Temp.min</p>
+                <!-- <img src="../../Img/maxima.png" class="arrow"> -->
+                <p class="temp_max">Temp.max</p>
+                <p class="humidity">Humedad</p>
+                
+            </div>
+        <template is ="dom-repeat" items="{{list}}">
+            <div class="day">
+                <p class="numb">{{_func(index)}}</p>
+                <img class="icon" src={{item.icon}}>
+                <p class="desc">{{item.desc}}</p>
+                <p class="date">{{item.date}}</p>
+                <!-- <img src="../../Img/minima.png" class="arrow">  -->
+                <p class="temp_min">{{item.temp_min}}</p>
+                <!-- <img src="../../Img/maxima.png" class="arrow"> -->
+                <p class="temp_max">{{item.temp_max}}</p>
+                <p class="humidity">{{item.humidity}}</p>
+                </div>
+        </template>
+    </template>
+
+</dom-module>
+
+
+<script>
+        Polymer({
+            is: 'rober-forecast',
+            properties: {
+                list: new Array(),
+                num: Number
+              
+            },
+            ready: function () {
+    
+            },
+            _func: function(index){
+                return index+1;
+                }
+            
+        });
+
+</script>

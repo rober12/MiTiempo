@@ -1,0 +1,198 @@
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../iron-image/iron-image.html">
+<link rel="import" href="../rober-current/rober-current.html">
+<link rel="import" href="../rober-forecast/rober-forecast.html">
+<script type='text/javascript' src='moment.js'></script>
+<script type="text/javascript" src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
+
+<link rel="import" href="../neon-animation/neon-animated-pages.html">
+<link rel="import" href="../neon-animation/neon-animatable.html">
+<link rel="import" href="../neon-animation/neon-animations.html">
+
+
+<dom-module id="rober-weather">
+    <template>
+        <style>
+            :host {
+                /* que tenga un anchura de */
+                width: 100%;
+                /* que tenga una altura de */
+                height: 100%;
+                /* que lo que sobresalga me lo oculte */
+                overflow: hidden;
+                /* que se comporte como un bloque */
+                display: block;
+            }
+
+            #image {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                background-color: lightgray;
+            }
+            #pages {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+            }
+            .boton{
+                position:relative;
+                
+                padding: 20px;
+                font-weight: 600;
+                color: #1d5991; 
+                width: 12%;
+                text-align: center;
+                border-radius: 6px;
+              }
+            /* .imgR{
+                width: 80%;
+                position: absolute;   
+            } */
+            /* ul.horizontal li  {
+                
+                display: inline;
+                padding: .3em;
+                display: block;
+                text-decoration: none;
+                color: #333;
+                background: #F4F4F4;
+                border-top: 1px solid #7C7C7C;
+                border-right: 1px solid #7C7C7C;
+                border-bottom: 1px solid #9C9C9C;
+           }  */
+
+         
+
+        </style>
+        <!-- <ul id=”button”>
+            <li><a href="http://127.0.0.1:8080/components/MiTiempo/">Home</a></li>
+            <li><a href="https://www.cssblog.es/crear-un-menu-horizontal-simple-con-css/#”">About</a></li>
+            <li><a href="https://www.cssblog.es/crear-un-menu-horizontal-simple-con-css/#”">Services</a></li>
+            <li><a href="https://www.cssblog.es/crear-un-menu-horizontal-simple-con-css/#”">Clients</a></li>
+            <li><a href="https://www.cssblog.es/crear-un-menu-horizontal-simple-con-css/#”">Products</a></li>
+            <li><a href="https://www.cssblog.es/crear-un-menu-horizontal-simple-con-css/#”">F.A.Q</a></li>
+            <li><a href="https://www.cssblog.es/crear-un-menu-horizontal-simple-con-css/#”">Help</a></li>
+            <li><a href="https://www.cssblog.es/crear-un-menu-horizontal-simple-con-css/#”">Contact Us</a></li>       
+        </ul> -->
+        <!-- <iron-image id="image" sizing="cover" preload src="{{img}}"></iron-image> -->
+        <iron-image id="image" sizing="cover" preload src="{{imageSrc}}"></iron-image>
+        <button class="boton" type="button" src="../../Img/Recargar.png" on-click="refresh">Refrescar
+            <!-- <img class="imgR" src="../../Img/Recargar.png" alt="recarga"> -->
+        </button>
+        <!-- <paper-icon-button id="refresh_button" class="refresh_button" icon="refresh" title="refresh" on-click="_refresh"> -->
+        <!-- se necesita el appid para que funcione la peticion -->
+        <iron-ajax 
+            auto 
+            handle-as="json" url="https://api.openweathermap.org/data/2.5/weather?lat=40.64&lon=-3.99&appid=8569089aa7150ae95b23fac7d5e50337&units=metric&lang=es"
+            on-response="getCurrentData">
+        </iron-ajax>
+        <iron-ajax 
+            auto 
+            handle-as="json" url="https://api.openweathermap.org/data/2.5/forecast?lat=40.64&lon=-3.99&cnt=16&mode=json&appid=8569089aa7150ae95b23fac7d5e50337&units=metric&lang=es"
+            on-response="getForecastData">
+        </iron-ajax>
+        <neon-animated-pages id="pages" class="flex" selected="0" entry-animation="{{entryAnimation}}" exit-animation="{{exitAnimation}}" on-track="handleTrack">
+            <neon-animatable>
+                <rober-current id="currentWeather" ></rober-current>
+            </neon-animatable>
+            <neon-animatable>
+                <rober-forecast id="forecast" list="[[list]]"></rober-forecast>
+            </neon-animatable>
+        </neon-animated-pages>
+        <!-- <p ondblclick="refresh()">Double-click me</p>-->
+    </template>
+</dom-module>
+
+<script>
+    Polymer({
+        is: 'rober-weather',
+        properties: {
+            imageSrc: String,
+            list: {
+                type: Array,
+                value: function(){return [];}
+            }
+        },
+        ready: function () {
+            this.$.pages.selected = 0;
+            this.exitAnimation = 'slide-up-animation';
+            this.eentryAnimation = 'fade-out-animation';
+            this.actualizarDatos;
+        },
+        getCurrentData: function (event) {
+            console.log(event.detail.response);
+            var response = event.detail.response;
+            this.imageSrc = "Img/" + response.weather[0].icon + "_bg.jpg";
+            // this.img = "Img/imagenbuena.jpg";
+            var current = this.$.currentWeather;
+            console.log(current);
+
+            current.temp = Number(response.main.temp).toFixed(1) + "ºC";
+            current.humidity = Number(response.main.humidity) + "%";
+            current.city = response.name;
+            current.desc = response.weather[0].description;
+        },
+        getForecastData: function (event) {
+            console.log(event.detail.response);
+            var response = event.detail.response;
+            var forecast = this.$.forecast;
+            this.city = response.name;
+            var list = response.list;
+            for(var i=0;i<list.length;i++ ){
+                
+                list[i].icon="Img/" + list[i].weather[0].icon + ".png";
+                list[i].desc = this.capitalize(list[i].weather[0].description);
+                list[i].humidity = list[i].main.humidity + "%";
+                list[i].temp_max = Number(list[i].main.temp_max).toFixed(1) + "º";
+                list[i].temp_min = Number(list[i].main.temp_min).toFixed(1) + "º";
+
+                var day = moment.unix(Number(list[i].dt));
+                day.locale('es');
+                list[i].date = day.format("dddd[, ]DD/MM/YYYY hh:mm")
+            };
+            this.list = list;
+            this.set("list", list);
+        },
+        capitalize: function(s){
+            return s[0].toUpperCase() + s.slice(1);
+        },
+        handleTrack: function(e){
+            switch(e.detail.state){
+                case 'start':
+                    this.sizeTapped = e.detail.y;
+                    console.log(this.sizeTapped);
+                    break;
+                case 'track':
+                    break;
+                case 'end':
+                    if(this.$.pages.selected == 0){
+                        if(e.detail.y < (this.sizeTapped-100)){
+                            this.exitAnimation = 'fade-out-animation';
+                            this.eentryAnimation = 'slide-down-animation';
+                            this.$.pages.selected = 1;
+                        }
+                    }
+                    if(this.$.pages.selected == 1){
+                        if(e.detail.y -100 > this.sizeTapped){
+                            this.exitAnimation = 'slide-up-animation';
+                            this.eentryAnimation = 'fade-in-animation';
+                            this.$.pages.selected = 0;
+                        }
+                    }
+                break;
+            }
+        },
+        actualizarDatos: function(){
+            // location.reload(true);
+            location.assign("http://127.0.0.1:8080/components/MiTiempo/");
+        },
+        refresh:function()
+	    {
+        var int=self.setInterval(this.actualizarDatos,10);
+		// location.reload(true);
+	    }
+
+    });
+
+</script>
